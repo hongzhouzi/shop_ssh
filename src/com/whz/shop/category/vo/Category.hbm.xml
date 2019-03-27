@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+    
+<hibernate-mapping>
+	<class name="com.whz.shop.category.vo.Category" table="category">
+		<id name="cid">
+			<generator class="native"/>
+		</id>
+		<property name="cname"/>
+		
+		<!-- 一对多的方式关联外键 ，集合是无序的，加上一个排序可让他有序，
+		这儿没有用list是因为list在保持有序时会在表中多加上一列来保持有序
+		在加载时需要去掉懒加载-->
+		<set order-by="cid" name="categorySeconds" lazy="false">
+			<key column="cid" />
+			<one-to-many class="com.whz.shop.categorysecond.vo.CategorySecond"/>
+		</set>
+	</class>
+</hibernate-mapping>

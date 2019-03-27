@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<constant name="struts.objectFactory" value="spring"></constant>
+    <constant name="struts.devMode" value="false" />
+
+	<!-- <package name="category"  namespace="/" extends="struts-default">
+		
+		<action name="category" class="com.whz.shop.category.active.CategoryAction">
+			<result name="index">/WEB-INF/jsp/index.jsp</result>
+		</action>
+		
+	</package> -->
+	
+	<!-- struct中不支持前缀和后缀配置，springMVC中支持 -->
+	<package name="user" namespace="/" extends="struts-default" >
+		<!-- 对于很多页面都需要用到的结果弄成全局设置 -->
+			<global-results>
+				<result name="msg">/WEB-INF/jsp/msg.jsp</result>
+				<!-- 从定向到首页 -->
+				<result name="index"  type="redirectAction">index</result>
+				
+				<!-- <result name="login">/WEB-INF/jsp/login.jsp</result> -->
+			</global-results>
+		<!-- 配置首页访问的Action -->
+		<action name="index" class="com.whz.shop.index.action.IndexAction">
+			<result name="index">/WEB-INF/jsp/index.jsp</result>
+		</action>
+		
+		<!-- 访问注册界面的Action -->
+		<action name="user_*" class="com.whz.shop.user.action.UserAction" method="{1}">
+			<result name="login">/WEB-INF/jsp/login.jsp</result>
+			<result name="register">/WEB-INF/jsp/register.jsp</result>
+			<!-- 配置校验器逻辑视图，出错了让他回到register.jsp页面 -->
+			<result name="input">/WEB-INF/jsp/register.jsp</result>
+			<result name="checkImgFail">/WEB-INF/jsp/login.jsp</result>
+		</action>
+		
+		<!-- 访问注册界面的Action -->
+		<action name="checkImg" class="com.whz.shop.user.action.CheckImgAction">
+		</action>
+		
+		<action name="userAdmin_*" class="com.whz.shop.user.adminaction.UserAdminAction" method="{1}">
+			<result name="findAll">/admin/user/list.jsp </result>
+			<result name="deleteSuccess" type="redirectAction">userAdmin_findAll?page=1</result>
+			<result name="editSuccess">/admin/user/edit.jsp </result>
+			<result name="updateSuccess" type="redirectAction">userAdmin_findAll?page=1</result>
+		</action>
+	</package>
+	
+	
+	<package name="product"  namespace="/" extends="struts-default">
+		<action name="product_*" class="com.whz.shop.product.ProductAction" method="{1}">
+			<result name="findProductByPid">/WEB-INF/jsp/product.jsp</result>
+			<result name="findByCid">/WEB-INF/jsp/productList.jsp</result>
+			<result name="findByCsid">/WEB-INF/jsp/productList.jsp</result>
+		</action>
+		
+	</package>
+	
+	<package name="cart"  namespace="/" extends="struts-default">
+		<action name="cart_*" class="com.whz.shop.cart.action.CartAction" method="{1}">
+			<!-- 防止表单重复提交，Action的重定向 -->
+			<result name="addCart" type="redirectAction">cart_addCartRedirect</result>
+			<result name="addCartRedirect">/WEB-INF/jsp/cart.jsp</result>
+		<!-- 	
+			<result name="addCart">/WEB-INF/jsp/cart.jsp</result>
+	 		若重复提交，则会跳转到这个页面，注意这里result的名字，一定要是invalid.token
+	 		<result name="invalid.token">/WEB-INF/jsp/cart.jsp</result>
+	 		这里一定要有这两个拦截器
+	 		<interceptor-ref name="token"></interceptor-ref>
+	 		<interceptor-ref name="defaultStack"></interceptor-ref>
+	 		 -->
+			<result name="removeCart">/WEB-INF/jsp/cart.jsp</result>
+			<result name="clearCart">/WEB-INF/jsp/cart.jsp</result>
+			<result name="myCart">/WEB-INF/jsp/cart.jsp</result>
+		</action>
+		
+	</package>
+	
+	<package name="order"  namespace="/" extends="struts-default">
+		<global-results>
+			<result name="login">/WEB-INF/jsp/login.jsp</result>
+		</global-results>
+		<action name="order_*" class="com.whz.shop.order.action.OrderAction" method="{1}">
+			<result name="submitOrder">/WEB-INF/jsp/order.jsp</result>
+			<result name="findByUid">/WEB-INF/jsp/orderList.jsp</result>
+			<result name="findByOid">/WEB-INF/jsp/order.jsp</result>
+		</action>
+		
+	</package>
+	
+	<package name="admin"  namespace="/" extends="struts-default">
+		<interceptors>
+			<interceptor name="privilegeInterceptor" class="com.whz.shop.interceptor.PrivilegeInterceptor"></interceptor>
+		</interceptors>
+	
+		<global-results>
+			<result name="login">/admin/index.jsp</result>
+		</global-results>
+		
+		<action name="admin_*" class="com.whz.shop.admin.action.AdminAction" method="{1}">
+			<result name="index">/admin/index.jsp</result>
+			<result name="loginSuccess" type="redirect">/admin/home.jsp</result>
+		</action>
+		
+		<!-- 后台一级分类管理Action -->
+		<action name="adminCategory_*" class="com.whz.shop.category.adminactive.AdminCategoryAction" method="{1}">
+			<result name="findAll">/admin/category/list.jsp</result>
+			<result name="saveSuccess" type="redirectAction">adminCategory_findAll</result>
+			<result name="deleteSuccess" type="redirectAction">adminCategory_findAll</result>
+			<result name="editSuccess">/admin/category/edit.jsp</result>
+			<result name="updateSuccess" type="redirectAction">adminCategory_findAll</result>
+			
+			<!-- 需要把默认的拦截器也加载进来 -->
+			<interceptor-ref name="privilegeInterceptor"/>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<!-- 后台二级分类管理Action -->
+		<action name="adminCategorySecond_*" class="adminCategorySecondAction" method="{1}">
+			<result name="findAll">/admin/categorysecond/list.jsp</result>
+			<result name="addPage">/admin/categorysecond/add.jsp</result>
+			<result name="saveSuccess" type="redirectAction">adminCategorySecond_findAll?page=1</result>
+			<result name="deleteSuccess" type="redirectAction">adminCategorySecond_findAll?page=1</result>
+			<result name="editSuccess">/admin/categorysecond/edit.jsp</result>
+			<result name="updateSuccess" type="redirectAction">adminCategorySecond_findAll?page=1</result>
+			
+			<interceptor-ref name="privilegeInterceptor"/>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<!-- 后台商品管理的Action -->
+		<action name="adminProduct_*" class="adminProductAction" method="{1}">
+			<result name="findAll">/admin/product/list.jsp</result>
+			<result name="addPageSuccess">/admin/product/add.jsp</result>
+			<result name="saveSuccess" type="redirectAction">adminProduct_findAll.action?page=1</result>
+			<result name="deleteSuccess" type="redirectAction">adminProduct_findAll.action?page=1</result>
+			<result name="editSuccess">/admin/product/edit.jsp</result>
+			<result name="updateSuccess" type="redirectAction">adminProduct_findAll.action?page=1</result>
+			<interceptor-ref name="privilegeInterceptor"/>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<!-- 后台订单管理Action -->
+		<action name="adminOrder_*" class="com.whz.shop.order.adminaction.AdminOrderAction" method="{1}">
+			<result name="findAll">/admin/order/list.jsp</result>
+			<result name="updateStateSuccess" type="redirectAction">adminOrder_findAll?page=1</result>
+			<result name="findOrderItem" >/admin/order/orderItem.jsp</result>
+			<interceptor-ref name="privilegeInterceptor"/>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+	</package>
+	
+</struts>
